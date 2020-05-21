@@ -10,3 +10,5 @@ export const databaseSettings: IDatabaseSetting = {
     user: String(process.env.USER),
     password: String(process.env.PASSWORD),
 };
+
+export const port: number = Number(process.env.APP_PORT);
