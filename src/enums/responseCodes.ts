@@ -1,6 +1,7 @@
 export enum RESPONSE_CODES {
     'OK' = 200,
     'CREATED' = 201,
+    'NO CONTENT' = 204,
     'BAD REQUEST' = 400,
     'NOT FOUND' = 404,
     'METHOD NOT ALLOWED' = 405,

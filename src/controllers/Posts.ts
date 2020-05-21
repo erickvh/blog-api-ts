@@ -50,7 +50,24 @@ export const updatePost = async (res: ServerResponse, req: IncomingMessage) => {
                     `
     );
 
-    response(res, RESPONSE_CODES.OK, `Post id: ${id} updated sucessfully`);
+    response(
+        res,
+        RESPONSE_CODES['NO CONTENT'],
+        `Post id: ${id} updated sucessfully`
+    );
+};
+
+export const deletePost = async (res: ServerResponse, req: IncomingMessage) => {
+    const id: number = getId(req);
+    let result: QueryResult = await client.query(
+        `delete from posts where id=${id}`
+    );
+
+    response(
+        res,
+        RESPONSE_CODES['NO CONTENT'],
+        `Post id: ${id} was deleted sucessfully`
+    );
 };
 
 const getId = (req: IncomingMessage) => {
