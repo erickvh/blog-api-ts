@@ -9,7 +9,7 @@ import { UrlWithParsedQuery, parse } from 'url';
 export const getPosts = async (res: ServerResponse) => {
     try {
         const result: QueryResult = await client.query(
-            'select * from posts where deleted=false order by created_at desc'
+            'select  id,title,content,description,created_at,updated_at from posts where deleted=false order by created_at desc'
         );
 
         response(
@@ -19,57 +19,100 @@ export const getPosts = async (res: ServerResponse) => {
             JSON.stringify(result.rows)
         );
     } catch {
-        response(res, 500);
+        response(res, RESPONSE_CODES['INTERNAL SERVER ERROR']);
     }
 };
 
 export const createPost = async (res: ServerResponse, req: IncomingMessage) => {
     let data = await parseData(req);
-    let result: QueryResult = await client.query(
-        `insert into posts values(default,'${data.title}','${data.content}','${data.description}',default,default,null)`
-    );
-    response(res, RESPONSE_CODES.CREATED, 'Post created sucessfully');
+    try {
+        let result: QueryResult = await client.query(
+            `insert into posts values(default,'${data.title}','${data.content}','${data.description}',default,default,null)`
+        );
+
+        response(res, RESPONSE_CODES.CREATED, 'Post created sucessfully');
+    } catch {
+        response(res, RESPONSE_CODES['INTERNAL SERVER ERROR']);
+    }
 };
 
 export const getPost = async (res: ServerResponse, req: IncomingMessage) => {
-    let result: QueryResult = await client.query(
-        `select * from posts where id=${getId(req)}`
-    );
-    response(res, RESPONSE_CODES.OK, undefined, JSON.stringify(result.rows));
+    try {
+        let result: QueryResult = await client.query(
+            `select id,title,content,description,created_at,updated_at from posts where id=${getId(
+                req
+            )} and deleted=false`
+        );
+
+        // if there's not result not found
+        if (result.rowCount == 0) {
+            response(res, RESPONSE_CODES['NOT FOUND']);
+        }
+
+        response(
+            res,
+            RESPONSE_CODES.OK,
+            undefined,
+            JSON.stringify(result.rows[0])
+        );
+    } catch {
+        response(res, RESPONSE_CODES['INTERNAL SERVER ERROR']);
+    }
 };
 
 export const updatePost = async (res: ServerResponse, req: IncomingMessage) => {
     let data = await parseData(req);
     const id: number = getId(req);
-    let result: QueryResult = await client.query(
-        `update  posts set title='${data.title}', 
-                    content='${data.content}',
-                    description='${data.description}',
-                    updated_at=now()
-                    where id=${id}
-                    `
-    );
 
-    response(
-        res,
-        RESPONSE_CODES['NO CONTENT'],
-        `Post id: ${id} updated sucessfully`
-    );
+    try {
+        let result: QueryResult = await client.query(
+            `update  posts set title='${data.title}', 
+                        content='${data.content}',
+                        description='${data.description}',
+                        updated_at=now()
+                        where id=${id} and deleted=false
+                        `
+        );
+
+        // if there's not result not found
+        if (result.rowCount == 0) {
+            response(res, RESPONSE_CODES['NOT FOUND']);
+        }
+
+        response(
+            res,
+            RESPONSE_CODES['ACCEPTED'],
+            `Post id: ${id} updated sucessfully`
+        );
+    } catch {
+        response(res, RESPONSE_CODES['INTERNAL SERVER ERROR']);
+    }
 };
 
 export const deletePost = async (res: ServerResponse, req: IncomingMessage) => {
     const id: number = getId(req);
-    let result: QueryResult = await client.query(
-        `delete from posts where id=${id}`
-    );
 
-    response(
-        res,
-        RESPONSE_CODES['NO CONTENT'],
-        `Post id: ${id} was deleted sucessfully`
-    );
+    try {
+        let result: QueryResult = await client.query(
+            `update posts set deleted=true where id=${id}`
+        );
+
+        // if there's not result not found
+        if (result.rowCount == 0) {
+            response(res, RESPONSE_CODES['NOT FOUND']);
+        }
+
+        response(
+            res,
+            RESPONSE_CODES['ACCEPTED'],
+            `Post id: ${id} was deleted sucessfully`
+        );
+    } catch {
+        response(res, RESPONSE_CODES['INTERNAL SERVER ERROR']);
+    }
 };
 
+// get id for path required
 const getId = (req: IncomingMessage) => {
     const urlParsed: UrlWithParsedQuery = parse(String(req.url), true);
     const path: string = String(urlParsed.path);

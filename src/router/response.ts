@@ -11,7 +11,7 @@ export const response = async (
         'content-Type': 'application/json',
     });
     // response in this case is different
-    if (code === 404 || code === 405 || code === 201 || code === 204) {
+    if (code === 404 || code === 405 || code === 201 || code === 202) {
         res.write(
             JSON.stringify({
                 status: code,
