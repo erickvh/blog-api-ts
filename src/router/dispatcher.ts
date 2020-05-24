@@ -8,5 +8,5 @@ export const dispatcher = async (req: IncomingMessage, res: ServerResponse) => {
     const path: string = String(urlParsed.path);
     const method: string = String(req.method);
 
-    await router(path, method, res);
+    await router(path, method, res, req);
 };

@@ -5,7 +5,6 @@ import { dispatcher } from './src/router/dispatcher';
 const server: Server = createServer(
     async (req: IncomingMessage, res: ServerResponse) => {
         await dispatcher(req, res);
-        res.end();
     }
 );
 
