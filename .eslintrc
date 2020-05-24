@@ -1,0 +1,15 @@
+{
+    "extends": ["plugin:prettier/recommended"],
+
+    "plugins": ["prettier"],
+
+    "rules": {
+        "prettier/prettier": "error"
+    },
+    "parserOptions": {
+        "ecmaVersion": 6
+    },
+
+    "prefixWithI": "always",
+    "linebreak-style": ["error", "windows"]
+}
